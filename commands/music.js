@@ -115,18 +115,31 @@ async function playCommand(msg, voiceChannel, serverQueue, args) {
   const url = args[0];
   const searchVideoString = args.slice(0).join(' ');
 
-  try {//Gets the video
-    msg.channel.send(`:globe_with_meridians: **Searching** :mag_right: \`${searchVideoString}\``);
-    var video = await youtube.getVideo(url);
-  } catch (error) {
-    try {
-      var videos = await youtube.searchVideos(searchVideoString, 1);
-      var video = await youtube.getVideoByID(videos[0].id);
-    } catch (err) {
-      return msg.channel.send(`:x: **I could not obtain any search results**.`);
+  if (url.match(/^https?:\/\/(www.youtube.com|youtube.com)\/playlist(.*)$/)) {//Gets the playlist
+		const playlist = await youtube.getPlaylist(url);
+		const videos = await playlist.getVideos();
+    for (const video of Object.values(videos)) {
+			const video2 = await youtube.getVideoByID(video.id);
+			await handleVideo(video2, msg, voiceChannel, true);
+		}
+		return msg.channel.send(`:white_check_mark: Playlist :notepad_spiral: **${playlist.title}** has been added to the queue!`);
+	} else {
+    try {//Gets the video
+      msg.channel.send(`:globe_with_meridians: **Searching** :mag_right: \`${searchVideoString}\``);
+      var video = await youtube.getVideo(url);
+    } catch (error) {
+      try {
+        var videos = await youtube.searchVideos(searchVideoString, 1);
+        var video = await youtube.getVideoByID(videos[0].id);
+      } catch (err) {
+        return msg.channel.send(`:x: **I could not obtain any search results**.`);
+      }
     }
+    return await handleVideo(video, msg, voiceChannel);
   }
+}
 
+async function handleVideo(video, msg, voiceChannel, playlist = false) {
   const song = {//Creates a song object
     id: video.id,
     title: video.title,
@@ -156,6 +169,7 @@ async function playCommand(msg, voiceChannel, serverQueue, args) {
     }
   } else {
     serverQueue.songs.push(song);
+		if (playlist) return undefined;
     return msg.channel.send(`:ballot_box_with_check: **Song** \`${song.title}\` **added to queue** - By ${song.addedBy}`);
   }
 }
