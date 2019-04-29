@@ -10,6 +10,7 @@ const queue = new Map();
 module.exports.run = async (bot, msg, args) => {
 
   const voiceChannel = msg.member.voiceChannel;
+  if (!voiceChannel) return msg.channel.send(':x:**Please connect to a voice channel.**');
 
   const permissions = voiceChannel.permissionsFor(msg.client.user);
   if (!permissions.has('CONNECT'))
@@ -20,7 +21,6 @@ module.exports.run = async (bot, msg, args) => {
   const serverQueue = queue.get(msg.guild.id);
   const command = args[0];
 
-  if (!voiceChannel) return msg.channel.send(':x:**Please connect to a voice channel.**');
   if (!command) return msg.channel.send(`:x:**Missing args**, add option or url after the command.`);
   if (args.length == 1) {
     switch (command) {
