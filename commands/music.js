@@ -115,7 +115,7 @@ async function playCommand(msg, voiceChannel, serverQueue, args) {
   const url = args[0];
   const searchVideoString = args.slice(0).join(' ');
 
-  if (url.match(/^https?:\/\/(www.youtube.com|youtube.com)\/playlist(.*)$/)) {//Gets the playlist
+  if (url.match(/^https?:\/\/(www.youtube.com|youtube.com)\/(.*)list=(.*)$/)) {//Gets the playlist
 		const playlist = await youtube.getPlaylist(url);
 		const videos = await playlist.getVideos();
     for (const videoElement of Object.values(videos)) {

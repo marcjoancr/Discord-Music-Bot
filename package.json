@@ -1,6 +1,6 @@
 {
   "name": "clsbot",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "A bot for my server, YAY!",
   "main": "bot.js",
   "scripts": {
