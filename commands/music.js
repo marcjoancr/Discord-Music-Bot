@@ -1,4 +1,4 @@
-const Discord = require("discord.js");
+const { Client, Util } = require("discord.js");
 const { prefix, token, google_api_key } = require('./../config.json');
 
 const ytdl = require('ytdl-core');
@@ -116,11 +116,12 @@ async function playCommand(msg, voiceChannel, serverQueue, args) {
   const searchVideoString = args.slice(0).join(' ');
 
   if (url.match(/^https?:\/\/(www.youtube.com|youtube.com)\/playlist(.*)$/)) {//Gets the playlist
+    console.log("LIST");
 		const playlist = await youtube.getPlaylist(url);
 		const videos = await playlist.getVideos();
-    for (const video of Object.values(videos)) {
-			const video2 = await youtube.getVideoByID(video.id);
-			await handleVideo(video2, msg, voiceChannel, true);
+    for (const videoElement of Object.values(videos)) {
+			const video = await youtube.getVideoByID(videoElement.id);
+			await handleVideo(video, msg, voiceChannel, true);
 		}
 		return msg.channel.send(`:white_check_mark: Playlist :notepad_spiral: **${playlist.title}** has been added to the queue!`);
 	} else {
@@ -135,14 +136,16 @@ async function playCommand(msg, voiceChannel, serverQueue, args) {
         return msg.channel.send(`:x: **I could not obtain any search results**.`);
       }
     }
-    return await handleVideo(video, msg, voiceChannel);
+    return handleVideo(video, msg, voiceChannel);
   }
 }
 
 async function handleVideo(video, msg, voiceChannel, playlist = false) {
+  const serverQueue = queue.get(msg.guild.id);
+
   const song = {//Creates a song object
     id: video.id,
-    title: video.title,
+    title: Util.escapeMarkdown(video.title),
     url: `https://www.youtube.com/watch?v=${video.id}`,
     addedBy: msg.author.username
   };
@@ -170,8 +173,9 @@ async function handleVideo(video, msg, voiceChannel, playlist = false) {
   } else {
     serverQueue.songs.push(song);
 		if (playlist) return undefined;
-    return msg.channel.send(`:ballot_box_with_check: **Song** \`${song.title}\` **added to queue** - By ${song.addedBy}`);
+    else return msg.channel.send(`:ballot_box_with_check: **Song** \`${song.title}\` **added to queue** - By ${song.addedBy}`);
   }
+  return undefined;
 }
 
 async function play(guild, song) {
