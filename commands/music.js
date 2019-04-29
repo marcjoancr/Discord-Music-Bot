@@ -75,7 +75,7 @@ module.exports.run = async (bot, msg, args) => {
               },
               {
                 "name": "__NEXT__ :",
-                "value": `${serverQueue.songs.slice(0, 11).map(song => `**${count++}.** **${song.title}** | \`${song.duration.hours ? `${song.duration.hours}:` : ''}${song.duration.minutes}:${song.duration.seconds}\` - Added by **${song.addedBy}**`).join('\n\n')}`
+                "value": `${serverQueue.songs.slice(0, 10).map(song => `**${count++}.** **${song.title}** | \`${song.duration.hours ? `${song.duration.hours}:` : ''}${song.duration.minutes}:${song.duration.seconds}\` - Added by **${song.addedBy}**`).join('\n\n')}`
               }
             ]
           }
