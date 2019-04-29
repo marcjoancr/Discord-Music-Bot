@@ -1,4 +1,4 @@
-const { Client, Util } = require("discord.js");
+const Discord = require("discord.js");
 const { prefix, token, google_api_key } = require('./../config.json');
 
 const ytdl = require('ytdl-core');
@@ -55,12 +55,32 @@ module.exports.run = async (bot, msg, args) => {
       case "queue":
         if (!serverQueue) return msg.channel.send(':x: **There is nothing playing.**');
         let count = 1;
-        msg.channel.send(`
-__**Song queue:**__
-${serverQueue.songs.map(song => `**${count++}.** __${song.title}__ - Added by __${song.addedBy}__`).join('\n')}
-
-**Now playing:** ${serverQueue.songs[0].title} - Added by ${serverQueue.songs[0].addedBy}
-        `);
+        const queueEmbed = {
+          "embed": {
+            "title": `Queue for ${msg.guild.name}`,
+            "url": "https://discordapp.com",
+            "color": 4886754,
+            "timestamp": `${msg.createdAt}`,
+            "footer": {
+              "icon_url": `${msg.author.avatarURL}`,
+              "text": `${serverQueue.songs.length} songs in queue`
+            },
+            "thumbnail": {
+              "url": `${bot.user.avatarURL}`
+            },
+            "fields": [
+              {
+                "name": "__NOW PLAYING__ :",
+                "value": `**${serverQueue.songs[0].title}** | \`${serverQueue.songs[0].duration.hours ? `${serverQueue.songs[0].duration.hours}:` : ''}${serverQueue.songs[0].duration.minutes}:${serverQueue.songs[0].duration.seconds}\` - Added by **${serverQueue.songs[0].addedBy}**`
+              },
+              {
+                "name": "__NEXT__ :",
+                "value": `${serverQueue.songs.slice(1, 11).map(song => `**${count++}.** **${song.title}** | \`${song.duration.hours ? `${song.duration.hours}:` : ''}${song.duration.minutes}:${song.duration.seconds}\` - Added by **${song.addedBy}**`).join('\n\n')}`
+              }
+            ]
+          }
+        };
+        msg.channel.send(queueEmbed);
         break;
 
       //Get the actual song is playing
@@ -144,10 +164,12 @@ async function handleVideo(video, msg, voiceChannel, playlist = false) {
 
   const song = {//Creates a song object
     id: video.id,
-    title: Util.escapeMarkdown(video.title),
+    title: Discord.Util.escapeMarkdown(video.title),
     url: `https://www.youtube.com/watch?v=${video.id}`,
+    duration: video.duration,
     addedBy: msg.author.username
   };
+
   if (!serverQueue) {//Creates a queue in case it doesn't exists
     const queueContruct = {
       textChannel: msg.channel,
