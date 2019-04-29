@@ -1,0 +1,17 @@
+{
+  "name": "clsbot",
+  "version": "1.0.0",
+  "description": "A bot for my server, YAY!",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "author": "Twaia",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^11.4.2",
+    "node-opus": "^0.3.1",
+    "simple-youtube-api": "^5.1.1",
+    "ytdl-core": "^0.29.1"
+  }
+}
