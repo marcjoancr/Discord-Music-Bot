@@ -1,4 +1,4 @@
-const Discord = require("discord.js");
+const { Client, Util } = require("discord.js");
 const { prefix, token, google_api_key } = require('./../config.json');
 
 const ytdl = require('ytdl-core');
@@ -10,6 +10,7 @@ const queue = new Map();
 module.exports.run = async (bot, msg, args) => {
 
   const voiceChannel = msg.member.voiceChannel;
+  if (!voiceChannel) return msg.channel.send(':x:**Please connect to a voice channel.**');
 
   const permissions = voiceChannel.permissionsFor(msg.client.user);
   if (!permissions.has('CONNECT'))
@@ -20,7 +21,6 @@ module.exports.run = async (bot, msg, args) => {
   const serverQueue = queue.get(msg.guild.id);
   const command = args[0];
 
-  if (!voiceChannel) return msg.channel.send(':x:**Please connect to a voice channel.**');
   if (!command) return msg.channel.send(`:x:**Missing args**, add option or url after the command.`);
   if (args.length == 1) {
     switch (command) {
@@ -115,21 +115,36 @@ async function playCommand(msg, voiceChannel, serverQueue, args) {
   const url = args[0];
   const searchVideoString = args.slice(0).join(' ');
 
-  try {//Gets the video
-    msg.channel.send(`:globe_with_meridians: **Searching** :mag_right: \`${searchVideoString}\``);
-    var video = await youtube.getVideo(url);
-  } catch (error) {
-    try {
-      var videos = await youtube.searchVideos(searchVideoString, 1);
-      var video = await youtube.getVideoByID(videos[0].id);
-    } catch (err) {
-      return msg.channel.send(`:x: **I could not obtain any search results**.`);
+  if (url.match(/^https?:\/\/(www.youtube.com|youtube.com)\/playlist(.*)$/)) {//Gets the playlist
+		const playlist = await youtube.getPlaylist(url);
+		const videos = await playlist.getVideos();
+    for (const videoElement of Object.values(videos)) {
+			const video = await youtube.getVideoByID(videoElement.id);
+			await handleVideo(video, msg, voiceChannel, true);
+		}
+		return msg.channel.send(`:white_check_mark: Playlist :notepad_spiral: **${playlist.title}** has been added to the queue!`);
+	} else {
+    try {//Gets the video
+      msg.channel.send(`:globe_with_meridians: **Searching** :mag_right: \`${searchVideoString}\``);
+      var video = await youtube.getVideo(url);
+    } catch (error) {
+      try {
+        var videos = await youtube.searchVideos(searchVideoString, 1);
+        var video = await youtube.getVideoByID(videos[0].id);
+      } catch (err) {
+        return msg.channel.send(`:x: **I could not obtain any search results**.`);
+      }
     }
+    return handleVideo(video, msg, voiceChannel);
   }
+}
+
+async function handleVideo(video, msg, voiceChannel, playlist = false) {
+  const serverQueue = queue.get(msg.guild.id);
 
   const song = {//Creates a song object
     id: video.id,
-    title: video.title,
+    title: Util.escapeMarkdown(video.title),
     url: `https://www.youtube.com/watch?v=${video.id}`,
     addedBy: msg.author.username
   };
@@ -156,8 +171,10 @@ async function playCommand(msg, voiceChannel, serverQueue, args) {
     }
   } else {
     serverQueue.songs.push(song);
-    return msg.channel.send(`:ballot_box_with_check: **Song** \`${song.title}\` **added to queue** - By ${song.addedBy}`);
+		if (playlist) return undefined;
+    else return msg.channel.send(`:ballot_box_with_check: **Song** \`${song.title}\` **added to queue** - By ${song.addedBy}`);
   }
+  return undefined;
 }
 
 async function play(guild, song) {
