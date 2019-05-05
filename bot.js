@@ -5,6 +5,8 @@ const fs = require("fs");
 const bot = new Discord.Client({disableEveryone: true});
 bot.commands = new Discord.Collection();
 
+let queue = null;
+
 fs.readdir("./commands/", (err, files) => {
 
   if (err) console.log(err);
@@ -15,10 +17,31 @@ fs.readdir("./commands/", (err, files) => {
   }
   jsfile.forEach((file, i) =>{
     let props = require(`./commands/${file}`);
+    if (props.config.name == 'music') {
+      queue = props.queue;
+    }
     console.log(`${file} loaded!`);
     bot.commands.set(props.config.name, props);
   });
 
+});
+
+bot.on('voiceStateUpdate', (oldMember, newMember, a) => {
+  let newUserChannel = newMember.voiceChannel
+  let oldUserChannel = oldMember.voiceChannel
+
+  if (oldUserChannel === undefined && newUserChannel !== undefined) {
+
+  } else if (newUserChannel === undefined) {
+    const serverQueue = queue.get(oldUserChannel.guild.id);
+    if (oldUserChannel == oldUserChannel.guild.me.voiceChannel && oldUserChannel.members.size == 1) {
+      if (serverQueue) {
+        serverQueue.songs = [];
+        serverQueue.textChannel.send(`:coffin: **Queue ended.**`);
+        oldUserChannel.guild.me.voiceChannel.leave();
+      } else oldUserChannel.guild.me.voiceChannel.leave();
+    }
+  }
 });
 
 bot.on("ready", async () => {
@@ -62,4 +85,4 @@ bot.on('message', message => {
 
 });
 
-bot.login(process.env.token);
+bot.login(token);

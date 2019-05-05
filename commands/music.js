@@ -7,6 +7,8 @@ const YouTube = require('simple-youtube-api');
 const youtube = new YouTube(google_api_key);
 const queue = new Map();
 
+module.exports.queue = queue;
+
 module.exports.run = async (bot, msg, args) => {
 
   const voiceChannel = msg.member.voiceChannel;
