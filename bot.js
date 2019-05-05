@@ -37,7 +37,6 @@ bot.on('voiceStateUpdate', (oldMember, newMember, a) => {
     if (oldUserChannel == oldUserChannel.guild.me.voiceChannel && oldUserChannel.members.size == 1) {
       if (serverQueue) {
         serverQueue.songs = [];
-        serverQueue.textChannel.send(`:coffin: **Queue ended.**`);
         oldUserChannel.guild.me.voiceChannel.leave();
       } else oldUserChannel.guild.me.voiceChannel.leave();
     }
