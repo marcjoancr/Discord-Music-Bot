@@ -1,6 +1,8 @@
 const Discord = require('discord.js');
 const { prefix, token } = require('./config.json');
-const fs = require("fs");
+
+const say = require('say');
+const fs = require('fs');
 
 const bot = new Discord.Client({disableEveryone: true});
 bot.commands = new Discord.Collection();
@@ -31,7 +33,16 @@ bot.on('voiceStateUpdate', (oldMember, newMember, a) => {
   let oldUserChannel = oldMember.voiceChannel
 
   if (oldUserChannel === undefined && newUserChannel !== undefined) {
-
+    const serverQueue = queue.get(newUserChannel.guild.id);
+    if (newMember.id == 322430356114505728) {
+      say.speak('Welcome back, creator! I\'m at your disposition', null, 1.05);
+      /*newUserChannel.join()
+        .then(connection => {
+          const dispatcher = connection.playFile('./assets/audio.mp3');
+          dispatcher.on("end", end => {newUserChannel.guild.me.voiceChannel.leave()});
+        }).catch(err => console.log(err));
+      */
+    }
   } else if (newUserChannel === undefined) {
     const serverQueue = queue.get(oldUserChannel.guild.id);
     if (oldUserChannel == oldUserChannel.guild.me.voiceChannel && oldUserChannel.members.size == 1) {
@@ -55,6 +66,7 @@ bot.on('message', message => {
 
   switch (command) {
     case "test":
+      message.channel.send("hello", { tts: true });
       message.channel.send("Yay! I'm actually working!");
       message.delete().catch(O_o=>{});
       break;
@@ -84,4 +96,5 @@ bot.on('message', message => {
 
 });
 
-bot.login(process.env.token);
+bot.login(process.env.token); //prod
+//bot.login(token); //local
