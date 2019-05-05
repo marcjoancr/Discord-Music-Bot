@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const { prefix, token } = require('./config.json');
 
-const say = require('say');
+//const say = require('say');
 const fs = require('fs');
 
 const bot = new Discord.Client({disableEveryone: true});
@@ -35,7 +35,7 @@ bot.on('voiceStateUpdate', (oldMember, newMember, a) => {
   if (oldUserChannel === undefined && newUserChannel !== undefined) {
     const serverQueue = queue.get(newUserChannel.guild.id);
     if (newMember.id == 322430356114505728) {
-      say.speak('Welcome back, creator! I\'m at your disposition', null, 1.05);
+      //say.speak('Welcome back, creator! I\'m at your disposition', null, 1.05);
       /*newUserChannel.join()
         .then(connection => {
           const dispatcher = connection.playFile('./assets/audio.mp3');
