@@ -119,7 +119,7 @@ module.exports.run = async (bot, msg, args) => {
   } else {
     switch (command) {
     //Plays the song passed as argument if its an url, and search the song in YouTube if its not
-    case "":
+    case " ":
     case "pl":
     case "play":
       playCommand(msg, voiceChannel, serverQueue, args);
