@@ -119,6 +119,7 @@ module.exports.run = async (bot, msg, args) => {
   } else {
     switch (command) {
     //Plays the song passed as argument if its an url, and search the song in YouTube if its not
+    case "":
     case "pl":
     case "play":
       playCommand(msg, voiceChannel, serverQueue, args);
@@ -154,6 +155,7 @@ async function playCommand(msg, voiceChannel, serverQueue, args) {
         var videos = await youtube.searchVideos(searchVideoString, 1);
         var video = await youtube.getVideoByID(videos[0].id);
       } catch (err) {
+	console.error(err);
         return msg.channel.send(`:x: **I could not obtain any search results**.`);
       }
     }
@@ -189,7 +191,8 @@ async function handleVideo(video, msg, voiceChannel, playlist = false) {
       var connection = await voiceChannel.join();
       queueContruct.connection = connection;
       play(msg.guild, queueContruct.songs[0]);
-    } catch (err) {
+    } catch (err) {	
+      console.error(err);
       queue.delete(msg.guild.id);
       return msg.channel.send(`:x:**I could not join the voice channel:** \`${err}\``);
     }
@@ -217,6 +220,7 @@ async function play(guild, song) {
     play(guild, serverQueue.songs[0])
   })
   .on('error', error => {
+    console.error(error);
     serverQueue.textChannel.send(`**Something went wrong** :x: ${error}`);
   });
   serverQueue.textChannel.send(`**Playing** :notes: \`${song.title}\` - Added by ${song.addedBy}`);
